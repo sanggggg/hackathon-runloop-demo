@@ -1,0 +1,442 @@
+{
+  "schemaVersion": 1,
+  "fixture": {
+    "id": "nimbus-onboarding",
+    "name": "Nimbus onboarding",
+    "description": "Deterministic browser-agent QA fixture with forkable onboarding paths.",
+    "defaultProfile": "baseline",
+    "profileEnvironmentVariable": "QA_PROFILE",
+    "profileEnvironmentAliases": [
+      "QA_VARIANT"
+    ],
+    "defaultPort": 3000
+  },
+  "account": {
+    "email": "demo@example.com",
+    "password": "branchpoint"
+  },
+  "api": {
+    "login": "/api/login",
+    "session": "/api/session",
+    "action": "/api/action",
+    "logout": "/api/logout",
+    "qa": {
+      "health": "/__qa/health",
+      "reset": "/__qa/reset",
+      "state": "/__qa/state",
+      "events": "/__qa/events"
+    }
+  },
+  "ui": {
+    "login": {
+      "emailLabel": "Email address",
+      "passwordLabel": "Password",
+      "submitLabel": "Sign in"
+    }
+  },
+  "stateContract": {
+    "publicFields": [
+      "stage",
+      "outcome",
+      "plan",
+      "selection",
+      "path"
+    ],
+    "stages": [
+      "use-case",
+      "team",
+      "invite-confirm",
+      "solo",
+      "done",
+      "error",
+      "timeout"
+    ],
+    "terminalStages": [
+      "done",
+      "error",
+      "timeout"
+    ],
+    "pathTemplates": {
+      "use-case": "/onboarding/use-case",
+      "team": "/onboarding/team",
+      "invite-confirm": "/onboarding/team/invitations",
+      "solo": "/onboarding/solo",
+      "done": "/done/:outcome",
+      "error": "/error",
+      "timeout": "/timeout"
+    }
+  },
+  "actions": {
+    "choose_team": {
+      "label": "Team plan",
+      "fromStage": "use-case",
+      "toStage": "team"
+    },
+    "invite_team": {
+      "label": "Invite teammates",
+      "fromStage": "team",
+      "toStage": "invite-confirm"
+    },
+    "confirm_invites": {
+      "label": "Send invitations",
+      "fromStage": "invite-confirm",
+      "toStage": "done"
+    },
+    "skip_invites": {
+      "label": "Skip invites",
+      "fromStage": "team",
+      "toStage": "done"
+    },
+    "choose_solo": {
+      "label": "Solo plan",
+      "fromStage": "use-case",
+      "toStage": "solo"
+    },
+    "choose_starter": {
+      "label": "Starter template",
+      "fromStage": "solo",
+      "toStage": "done"
+    },
+    "choose_blank": {
+      "label": "Blank workspace",
+      "fromStage": "solo",
+      "toStage": "done"
+    },
+    "choose_later": {
+      "label": "Decide later",
+      "fromStage": "use-case",
+      "toStage": "done"
+    },
+    "choose_import": {
+      "label": "Import from CSV",
+      "fromStage": "solo",
+      "toStage": "done"
+    }
+  },
+  "flows": {
+    "team-invite": {
+      "label": "Invite teammates, then finish",
+      "steps": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "team-invite"
+      }
+    },
+    "team-skip": {
+      "label": "Skip invitations",
+      "steps": [
+        "choose_team",
+        "skip_invites"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "team-skip"
+      }
+    },
+    "solo-starter": {
+      "label": "Create from a starter",
+      "steps": [
+        "choose_solo",
+        "choose_starter"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "solo-starter"
+      }
+    },
+    "solo-blank": {
+      "label": "Create a blank workspace",
+      "steps": [
+        "choose_solo",
+        "choose_blank"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "solo-blank"
+      }
+    },
+    "setup-later": {
+      "label": "Defer setup",
+      "steps": [
+        "choose_later"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "setup-deferred"
+      }
+    },
+    "solo-import": {
+      "label": "Import a workspace from CSV",
+      "steps": [
+        "choose_solo",
+        "choose_import"
+      ],
+      "baselineTerminal": {
+        "stage": "done",
+        "outcome": "solo-import"
+      }
+    }
+  },
+  "profiles": {
+    "baseline": {
+      "description": "All original paths pass; the import option is absent.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {},
+      "expectations": {
+        "team-invite": {
+          "status": "pass"
+        },
+        "team-skip": {
+          "status": "pass"
+        },
+        "solo-starter": {
+          "status": "pass"
+        },
+        "solo-blank": {
+          "status": "pass"
+        },
+        "setup-later": {
+          "status": "pass"
+        },
+        "solo-import": {
+          "status": "unavailable",
+          "httpStatus": 409,
+          "error": "action_unavailable"
+        }
+      },
+      "discoveries": []
+    },
+    "regression": {
+      "description": "A resilient rename still passes while blank and later reach error screens.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {
+        "choose_starter": "Use a starter"
+      },
+      "expectations": {
+        "team-invite": {
+          "status": "pass"
+        },
+        "team-skip": {
+          "status": "pass"
+        },
+        "solo-starter": {
+          "status": "pass",
+          "note": "ui-changed"
+        },
+        "solo-blank": {
+          "status": "fail",
+          "failureReason": "error-screen",
+          "terminal": {
+            "stage": "error",
+            "outcome": "blank-regression"
+          }
+        },
+        "setup-later": {
+          "status": "fail",
+          "failureReason": "error-screen",
+          "terminal": {
+            "stage": "error",
+            "outcome": "later-regression"
+          }
+        },
+        "solo-import": {
+          "status": "unavailable",
+          "httpStatus": 409,
+          "error": "action_unavailable"
+        }
+      },
+      "discoveries": []
+    },
+    "discovery": {
+      "description": "Baseline behavior plus a previously unknown import option.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later",
+        "choose_import"
+      ],
+      "labelOverrides": {},
+      "expectations": {
+        "team-invite": {
+          "status": "pass"
+        },
+        "team-skip": {
+          "status": "pass"
+        },
+        "solo-starter": {
+          "status": "pass"
+        },
+        "solo-blank": {
+          "status": "pass"
+        },
+        "setup-later": {
+          "status": "pass"
+        },
+        "solo-import": {
+          "status": "pass",
+          "note": "new-path"
+        }
+      },
+      "discoveries": [
+        "choose_import"
+      ]
+    },
+    "demo-head": {
+      "description": "Combined demo head: rename, two regressions, and one discovered path.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later",
+        "choose_import"
+      ],
+      "labelOverrides": {
+        "choose_starter": "Use a starter"
+      },
+      "expectations": {
+        "team-invite": {
+          "status": "pass"
+        },
+        "team-skip": {
+          "status": "pass"
+        },
+        "solo-starter": {
+          "status": "pass",
+          "note": "ui-changed"
+        },
+        "solo-blank": {
+          "status": "fail",
+          "failureReason": "error-screen",
+          "terminal": {
+            "stage": "error",
+            "outcome": "blank-regression"
+          }
+        },
+        "setup-later": {
+          "status": "fail",
+          "failureReason": "error-screen",
+          "terminal": {
+            "stage": "error",
+            "outcome": "later-regression"
+          }
+        },
+        "solo-import": {
+          "status": "pass",
+          "note": "new-path"
+        }
+      },
+      "discoveries": [
+        "choose_import"
+      ]
+    },
+    "removed-control": {
+      "description": "The starter control is removed to exercise unresolved intent handling.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {},
+      "expectations": {
+        "solo-starter": {
+          "status": "unavailable",
+          "httpStatus": 409,
+          "error": "action_unavailable"
+        }
+      },
+      "discoveries": []
+    },
+    "timeout": {
+      "description": "The defer action deterministically lands on a timeout screen.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {},
+      "expectations": {
+        "setup-later": {
+          "status": "fail",
+          "failureReason": "timeout",
+          "terminal": {
+            "stage": "timeout",
+            "outcome": "deferred-timeout"
+          }
+        }
+      },
+      "discoveries": []
+    },
+    "dom-refactor": {
+      "description": "Baseline semantics with a materially different DOM structure.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {},
+      "expectations": {},
+      "discoveries": []
+    },
+    "copy-rename": {
+      "description": "Baseline state transitions with visible copy changes for intent resilience evaluation.",
+      "visibleActions": [
+        "choose_team",
+        "invite_team",
+        "confirm_invites",
+        "skip_invites",
+        "choose_solo",
+        "choose_starter",
+        "choose_blank",
+        "choose_later"
+      ],
+      "labelOverrides": {},
+      "expectations": {},
+      "discoveries": []
+    }
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.qa-state/
+var/
+playwright-report/
+test-results/
+.DS_Store
+*.local
