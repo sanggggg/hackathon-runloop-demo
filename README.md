@@ -57,6 +57,19 @@ QA_PROFILE=baseline PORT=3000 npm start
 
 The server listens on `0.0.0.0` by default and honors `HOST` and `PORT`.
 
+## Branchpoint GitHub Actions
+
+The `Branchpoint QA` workflow runs `nimbus-action-baseline` for ready, same-repository
+pull requests and from the Actions tab with an optional ref. Add the shared
+server bearer token as the repository Actions secret `BRANCHPOINT_API_TOKEN`.
+The production API URL is the default; set the non-secret repository variable
+`BRANCHPOINT_API_URL` only to override it.
+
+The source repository is public, so Branchpoint fetches the selected ref without
+a second credential. Fork, Dependabot, and draft pull requests are intentionally
+skipped. Runs and their summaries appear under **Actions → Branchpoint QA** and
+as a pull-request check.
+
 ## Journey map
 
 After login, every baseline path starts from `/onboarding/use-case`.
