@@ -59,7 +59,7 @@ The server listens on `0.0.0.0` by default and honors `HOST` and `PORT`.
 
 ## Branchpoint GitHub Actions
 
-The `Branchpoint QA` workflow runs `nimbus-action-baseline` for ready, same-repository
+The `Branchpoint QA` workflow runs `nimbus-action-baseline-v3` for ready, same-repository
 pull requests and from the Actions tab with an optional ref. Add the shared
 server bearer token as the repository Actions secret `BRANCHPOINT_API_TOKEN`.
 The production API URL is the default; set the non-secret repository variable
