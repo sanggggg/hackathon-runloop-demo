@@ -1,0 +1,36 @@
+name: Branchpoint QA
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Optional SHA or ref to evaluate (defaults to the selected branch SHA).
+        required: false
+        type: string
+        default: ""
+
+# The source ref is public and needs no extra authentication. Keep the default
+# token read-only, and pass only the Branchpoint API secret below.
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    # Repository secrets are unavailable to fork and Dependabot PRs. Draft PRs
+    # also wait until they are ready for review before consuming QA resources.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       (github.event.pull_request.draft == false &&
+        github.event.pull_request.head.repo.full_name == github.repository))
+    uses: sanggggg/hackathon-runloop/.github/workflows/branchpoint-qa.yml@104bbdf7c0730b014e978156ed4a4fbe9a1d9f8f
+    with:
+      suite: nimbus-action-baseline
+      # A pull_request github.sha is a synthetic merge commit. Branchpoint needs
+      # the actual head SHA that this repository can serve to the QA engine.
+      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || inputs.ref || github.sha }}
+      api-url: ${{ vars.BRANCHPOINT_API_URL || 'https://branchpoint-server-production.up.railway.app' }}
+    secrets:
+      BRANCHPOINT_API_TOKEN: ${{ secrets.BRANCHPOINT_API_TOKEN }}
