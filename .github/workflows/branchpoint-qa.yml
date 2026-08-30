@@ -25,9 +25,9 @@ jobs:
       (github.event_name != 'pull_request' ||
        (github.event.pull_request.draft == false &&
         github.event.pull_request.head.repo.full_name == github.repository))
-    uses: sanggggg/hackathon-runloop/.github/workflows/branchpoint-qa.yml@104bbdf7c0730b014e978156ed4a4fbe9a1d9f8f
+    uses: sanggggg/hackathon-runloop/.github/workflows/branchpoint-qa.yml@01b9f633e53f380b0a5ccc45390612a0e46b30da
     with:
-      suite: nimbus-action-baseline
+      suite: nimbus-action-baseline-v3
       # A pull_request github.sha is a synthetic merge commit. Branchpoint needs
       # the actual head SHA that this repository can serve to the QA engine.
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || inputs.ref || github.sha }}
